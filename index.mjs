@@ -22,10 +22,10 @@ const port = process.env.PORT || 8080;
 // the pooler will keep that connection open for sometime to other clients to reuse
 const pool = new pg.Pool({
   host: "localhost",
-  port: 5433,
+  port: 5432,
   user: "postgres",
-  password: "postgres",
-  database: "sql_class_2_db",
+  password: "password",
+  database: "bookmyticket",
   max: 20,
   connectionTimeoutMillis: 0,
   idleTimeoutMillis: 0,
