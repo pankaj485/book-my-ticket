@@ -18,7 +18,7 @@ const getSeats = async (req, res) => {
     const data = await getAllSeats();
 
     if (!data) {
-      ApiResponse.badRequest(res, "something went wrong while getting data");
+      return ApiResponse.badRequest(res, "something went wrong while getting data");
     }
 
     ApiResponse.success(res, "seats data fetched", data);
@@ -32,7 +32,7 @@ const bookSeat = async (req, res) => {
     const payload = seatBookingSchema.safeParse(req.params);
 
     if (!payload.success) {
-      ApiResponse.badRequest(
+      return ApiResponse.badRequest(
         res,
         "Invalid data",
         JSON.parse(payload.error?.message),
@@ -47,13 +47,13 @@ const bookSeat = async (req, res) => {
     const result = await getSeatStatus(id);
 
     if (result && result.length === 0) {
-      ApiResponse.badRequest(res, "Seat already booked");
+      return ApiResponse.badRequest(res, "Seat already booked");
     }
 
     const bookingResult = await bookSingleSeat({ name, id, userId });
 
     if (!bookingResult) {
-      ApiResponse.internal(res, "Something went wrong while booking seat");
+      return ApiResponse.internal(res, "Something went wrong while booking seat");
     }
 
     ApiResponse.created(res, `Seat booked by: ${email}`);
