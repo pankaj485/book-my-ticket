@@ -11,6 +11,7 @@ CREATE TABLE users (
 );
 CREATE TABLE seats (
   id SERIAL PRIMARY KEY,
+  name VARCHAR(255),
   isbooked BOOLEAN DEFAULT FALSE,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   created_at TIMESTAMP DEFAULT now()
