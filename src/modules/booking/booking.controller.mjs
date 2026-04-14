@@ -28,10 +28,10 @@ const bookSeat = async (req, res) => {
       );
     }
 
-    const { id } = payload.data;
+    const { id, name } = payload.data;
     const { id: userId, email } = req.user;
 
-    const result = await bookSeatIfAvailable({ id, userId });
+    const result = await bookSeatIfAvailable({ id, userId, name });
 
     if (result.error === "not_found") {
       return ApiResponse.badRequest(res, "Requested seat not available.");
@@ -43,6 +43,7 @@ const bookSeat = async (req, res) => {
 
     ApiResponse.created(res, `Seat booked by: ${email}`);
   } catch (error) {
+    console.log({ error });
     ApiResponse.internal(res, "Error booking seat");
   }
 };

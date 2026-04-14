@@ -7,7 +7,7 @@ const getAllSeats = async () => {
   return rows;
 };
 
-const bookSeatIfAvailable = async ({ id, userId }) => {
+const bookSeatIfAvailable = async ({ id, userId, name }) => {
   const conn = await pool.connect();
   try {
     await conn.query("BEGIN");
@@ -28,8 +28,8 @@ const bookSeatIfAvailable = async ({ id, userId }) => {
     }
 
     const { rows: updated } = await conn.query(
-      "UPDATE seats SET isbooked = TRUE, user_id = $2 WHERE id = $1 RETURNING *",
-      [id, userId],
+      "UPDATE seats SET isbooked = TRUE, user_id = $2, name = $3 WHERE id = $1 RETURNING *",
+      [id, userId, name],
     );
 
     await conn.query("COMMIT");
