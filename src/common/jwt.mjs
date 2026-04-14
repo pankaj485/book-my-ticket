@@ -35,4 +35,5 @@ const verifyToken = (token) => {
 const genrateHash = (data) => {
   return createHash("sha256").update(data).digest("hex");
 };
+
 export { generateToken, genrateHash, verifyToken };

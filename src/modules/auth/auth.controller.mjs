@@ -1,5 +1,6 @@
 import z from "zod";
-import { generateToken, genrateHash } from "../../utils/jwt.util.mjs";
+import { ApiResponse } from "../../common/apierror.mjs";
+import { generateToken, genrateHash } from "../../common/jwt.mjs";
 import {
   addUserRecord,
   getUserByEmail,
@@ -39,18 +40,17 @@ const signup = async (req, res) => {
     const payload = userRegistrationSchema.safeParse(req.body);
 
     if (!payload.success) {
-      return res.status(400).json({
-        message: "Validation failed",
-        errors: JSON.parse(payload.error?.message),
-      });
+      ApiResponse.badRequest(
+        res,
+        "Validation failed",
+        JSON.parse(payload.error?.message),
+      );
     }
 
     const userExists = await getUserByEmail(payload.data.email);
 
     if (userExists) {
-      return res
-        .status(400)
-        .json({ message: "User with this email already exists" });
+      ApiResponse.badRequest(res, "User with this email already exists");
     }
 
     // ceate a hash of the password before storing it in the database
@@ -59,16 +59,14 @@ const signup = async (req, res) => {
     const userData = await addUserRecord(payload.data);
 
     if (!userData) {
-      return res.status(500).json({ message: "Failed to create user" });
+      ApiResponse.internal("Failed to create user");
     }
 
-    return res.status(201).json({
-      message: "Sign-up successful",
-      data: userData,
-    });
+    ApiResponse.created(res, "Sign-up successful", userData);
   } catch (error) {
     console.error("Error during sign-up:", error);
-    return res.status(500).json({ message: "Internal server error" });
+
+    ApiResponse.internal("Internal server error");
   }
 };
 
@@ -77,24 +75,22 @@ const signin = async (req, res) => {
     const payload = userLoginSchema.safeParse(req.body);
 
     if (!payload.success) {
-      return res.status(400).json({
-        message: "Validation failed",
-        errors: JSON.parse(payload.error?.message),
-      });
+      ApiResponse.badRequest(
+        "Invalid data",
+        JSON.parse(payload.error?.message),
+      );
     }
 
     const userData = await getUserByEmail(payload.data.email);
 
     if (!userData) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      ApiResponse.badRequest("Invalid email or password");
     }
 
     const hashedPassword = genrateHash(payload.data.password);
 
     if (hashedPassword !== userData.password) {
-      return res.status(400).json({
-        message: "Invalid email or password",
-      });
+      ApiResponse.badRequest("Invalid email or password");
     }
 
     const refresh_token = generateToken({
@@ -113,18 +109,21 @@ const signin = async (req, res) => {
     });
 
     if (!rfTokenUpdate) {
-      return res
-        .status(500)
-        .json({ message: "Sign-in failed. Please try again." });
+      ApiResponse.internal("Sign-in failed. Please try again.");
     }
 
     delete userData.password;
 
-    return res.status(200).json({
-      message: "Sign-in successful",
-      data: { userData, refresh_token, access_token },
-    });
-  } catch (error) {}
+    const data = {
+      userData,
+      refresh_token,
+      access_token,
+    };
+
+    ApiResponse.success(res, "Sign-in successful", data);
+  } catch (error) {
+    ApiResponse.internal(res, "something went wrong while sining in user");
+  }
 };
 
 export { signin, signup };
