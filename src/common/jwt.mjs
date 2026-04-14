@@ -21,8 +21,8 @@ const verifyToken = (token) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    if (decoded && decoded.userId) {
-      return decoded.userId;
+    if (decoded && decoded.email) {
+      return decoded;
     }
 
     return null;
