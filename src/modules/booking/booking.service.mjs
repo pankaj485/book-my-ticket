@@ -2,7 +2,7 @@ import { pool } from "../../db/db.config.mjs";
 
 const getAllSeats = async () => {
   const { rows } = await pool.query(
-    "SELECT s.id, s.isbooked, u.email, u.first_name FROM seats as s LEFT JOIN users as u ON u.id = s.user_id ORDER BY s.id ASC",
+    "SELECT s.id, s.isbooked, s.name, u.email FROM seats as s LEFT JOIN users as u ON u.id = s.user_id ORDER BY s.id ASC",
   );
   return rows;
 };

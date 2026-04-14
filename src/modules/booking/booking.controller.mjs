@@ -12,6 +12,7 @@ const getSeats = async (req, res) => {
     const data = await getAllSeats();
     ApiResponse.success(res, "seats data fetched", data);
   } catch (error) {
+    console.log(error);
     ApiResponse.internal(res, "Error getting seats data");
   }
 };
