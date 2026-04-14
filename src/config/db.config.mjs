@@ -15,4 +15,12 @@ const pool = new pg.Pool({
   idleTimeoutMillis: 0,
 });
 
+pool.on("connect", () => {
+  console.log("Connected to the database successfully.");
+});
+
+pool.on("error", (error) => {
+  console.error("Error connecting to the database:", error);
+});
+
 export { pool };

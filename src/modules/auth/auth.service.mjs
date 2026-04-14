@@ -26,7 +26,7 @@ const addUserRecord = async ({
     const data = [email, first_name, last_name, age, password];
 
     const { rows } = await pool.query(
-      "INSERT INTO users (email, first_name, last_name, age, password) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      "INSERT INTO users (email, first_name, last_name, age, password) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, first_name, last_name, age",
       data,
     );
 

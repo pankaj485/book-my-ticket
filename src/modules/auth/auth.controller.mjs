@@ -1,4 +1,5 @@
 import z from "zod";
+import { createHash } from "crypto";
 import { addUserRecord, getUserByEmail } from "./auth.service.mjs";
 
 const userRegistratoinSchema = z.object({
@@ -39,6 +40,11 @@ const signup = async (req, res) => {
         .status(400)
         .json({ message: "User with this email already exists" });
     }
+
+    // ceate a hash of the password before storing it in the database
+    data.data.password = createHash("sha256")
+      .update(data.data.password)
+      .digest("hex");
 
     const userData = await addUserRecord(data.data);
 
