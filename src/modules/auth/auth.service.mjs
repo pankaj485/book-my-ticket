@@ -37,4 +37,17 @@ const addUserRecord = async ({
   }
 };
 
-export { addUserRecord, getUserByEmail };
+const updateUserRefreshToken = async ({ email, token }) => {
+  try {
+    await pool.qyuery(
+      "UPDATE users SET refresh_token = $1 WHERE email = $2 RETURNING email, refresh_token",
+    );
+
+    return true;
+  } catch (error) {
+    console.error("Error updating user refresh token:", error);
+    return null;
+  }
+};
+
+export { addUserRecord, getUserByEmail, updateUserRefreshToken };
