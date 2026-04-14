@@ -1,7 +1,7 @@
 import { ApiResponse } from "../common/apierror.mjs";
 import { verifyToken } from "../common/jwt.mjs";
 
-const validateToken = async (req, res, next) => {
+const validateToken = (req, res, next) => {
   try {
     const { authorization } = req.headers;
 
