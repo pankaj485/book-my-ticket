@@ -103,6 +103,10 @@ const signin = async (req, res) => {
       expiresIn: "15m",
     });
 
+    if (!access_token || !refresh_token) {
+      ApiResponse.internal("Sign-in failed. Please try again.");
+    }
+
     const rfTokenUpdate = await updateUserRefreshToken({
       email: userData.email,
       token: refresh_token,

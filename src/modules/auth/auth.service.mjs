@@ -1,4 +1,4 @@
-import { pool } from "../../config/db.config.mjs";
+import { pool } from "../../db/db.config.mjs";
 
 const getUserByEmail = async (email) => {
   try {

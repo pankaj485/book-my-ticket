@@ -24,7 +24,7 @@ app.get("/", (req, res) => {
 app.use("/auth", authRouter);
 
 //get all seats
-app.get("/seats", getSeats);
+app.get("/seats", validateToken, getSeats);
 
 //book a seat give the seatId and your name
 app.put("/:id/:name", validateToken, bookSeat);

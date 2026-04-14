@@ -1,8 +1,8 @@
-import { pool } from "../../config/db.config.mjs";
+import { pool } from "../../db/db.config.mjs";
 
 const getAllSeats = async () => {
   try {
-    const result = await pool.query("SELECT * FROM seats"); // equivalent to Seats.find() in mongoose
+    const result = await pool.query("SELECT * FROM seats ORDER BY id ASC"); // equivalent to Seats.find() in mongoose
     const data = result.rows;
 
     return data;
@@ -34,7 +34,7 @@ const getSeatStatus = async (id) => {
   }
 };
 
-const bookSingleSeat = async ({ name, id, userId }) => {
+const bookSingleSeat = async ({ id, userId }) => {
   try {
     const conn = await pool.connect(); // pick a connection from the pool
 
