@@ -6,6 +6,7 @@ import { ApiResponse } from "./src/common/apierror.mjs";
 import { pool } from "./src/config/db.config.mjs";
 import { validateToken } from "./src/middlewares/auth.middleware.mjs";
 import { authRouter } from "./src/modules/auth/auth.route.mjs";
+import { getSeats } from "./src/modules/booking/booking.controller.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -22,18 +23,9 @@ app.get("/", (req, res) => {
 app.use("/auth", authRouter);
 
 //get all seats
-app.get("/seats", validateToken, async (req, res) => {
-  try {
-    const result = await pool.query("SELECT * FROM seats"); // equivalent to Seats.find() in mongoose
-    const data = result.rows;
-    ApiResponse.success(res, "seats data fetched", data);
-  } catch (error) {
-    ApiResponse.internal(res, "Error getting seats data");
-  }
-});
+app.get("/seats", validateToken, getSeats);
 
 //book a seat give the seatId and your name
-
 app.put("/:id/:name", async (req, res) => {
   try {
     const id = req.params.id;
