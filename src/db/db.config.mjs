@@ -1,11 +1,13 @@
 import pg from "pg";
+import { configDotenv } from "dotenv";
+configDotenv();
 
 const pool = new pg.Pool({
-  host: "localhost",
-  port: 5432,
-  user: "postgres",
-  password: "password",
-  database: "bookmyticket",
+  host: process.env.DB_HOST || "localhost",
+  port: process.env.DB_PORT || 5432,
+  user: process.env.DB_USER || "postgres",
+  password: process.env.DB_PASSWORD || "password",
+  database: process.env.DB_NAME || "bookmyticket",
   max: 20,
   connectionTimeoutMillis: 0,
   idleTimeoutMillis: 0,

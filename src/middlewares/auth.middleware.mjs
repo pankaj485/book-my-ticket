@@ -6,19 +6,24 @@ const validateUserAuth = (req, res, next) => {
     const { authorization } = req.headers;
 
     if (!authorization) {
-      ApiResponse.unauthorized(res, "Authorization token not provided");
+      return ApiResponse.unauthorized(res, "Authorization token not provided");
     }
 
     if (!authorization.startsWith("Bearer")) {
-      ApiResponse.unauthorized(res, "Invalid authorization token format");
+      return ApiResponse.unauthorized(
+        res,
+        "Invalid authorization token format",
+      );
     }
 
     const token = authorization.split(" ")[1];
+    const decoded = verifyToken(token);
 
-    if (!verifyToken(token)) {
-      ApiResponse.unauthorized(res, "Invalid token");
+    if (!decoded) {
+      return ApiResponse.unauthorized(res, "Invalid token");
     }
 
+    req.user = decoded;
     next();
   } catch (error) {
     console.log(error);

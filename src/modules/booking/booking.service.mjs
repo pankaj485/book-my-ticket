@@ -1,59 +1,44 @@
 import { pool } from "../../db/db.config.mjs";
 
 const getAllSeats = async () => {
-  try {
-    const result = await pool.query("SELECT * FROM seats ORDER BY id ASC"); // equivalent to Seats.find() in mongoose
-    const data = result.rows;
-
-    return data;
-  } catch (error) {
-    console.error("Error getting seats data", error);
-    return false;
-  }
+  const { rows } = await pool.query("SELECT * FROM seats ORDER BY id ASC");
+  return rows;
 };
 
-const getSeatStatus = async (id) => {
+const bookSeatIfAvailable = async ({ id, userId }) => {
+  const conn = await pool.connect();
   try {
-    const conn = await pool.connect(); // pick a connection from the pool
     await conn.query("BEGIN");
 
-    const { rows } = await conn.query(
-      "SELECT * FROM seats where id = $1 FOR UPDATE",
+    const { rows: seats } = await conn.query(
+      "SELECT * FROM seats WHERE id = $1 FOR UPDATE",
       [id],
     );
 
-    //end transaction by committing
-    await conn.query("COMMIT");
-    conn.release();
+    if (seats.length === 0) {
+      await conn.query("ROLLBACK");
+      return { error: "not_found" };
+    }
 
-    return rows;
-  } catch (error) {
-    console.error("something went wrong while booking seat");
+    if (seats[0].isbooked) {
+      await conn.query("ROLLBACK");
+      return { error: "already_booked" };
+    }
 
-    return null;
-  }
-};
-
-const bookSingleSeat = async ({ id, userId }) => {
-  try {
-    const conn = await pool.connect(); // pick a connection from the pool
-
-    await conn.query("BEGIN");
-
-    const { rows } = await conn.query(
+    const { rows: updated } = await conn.query(
       "UPDATE seats SET isbooked = TRUE, user_id = $2 WHERE id = $1 RETURNING *",
       [id, userId],
     );
 
     await conn.query("COMMIT");
-    conn.release();
-
-    return rows;
+    return { data: updated[0] };
   } catch (error) {
-    console.log(error);
-    console.error("Error booking seat", error);
-    return null;
+    await conn.query("ROLLBACK");
+    console.error("Error booking seat:", error);
+    throw new Error("Failed to book seat");
+  } finally {
+    conn.release();
   }
 };
 
-export { bookSingleSeat, getAllSeats, getSeatStatus };
+export { bookSeatIfAvailable, getAllSeats };

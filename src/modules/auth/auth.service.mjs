@@ -1,72 +1,59 @@
 import { pool } from "../../db/db.config.mjs";
 
 const getUserByEmail = async (email) => {
+  const conn = await pool.connect();
   try {
-    const data = [email];
-
-    const conn = await pool.connect();
     await conn.query("BEGIN");
-
-    const { rows } = await pool.query(
+    const { rows } = await conn.query(
       "SELECT id, email, password FROM users WHERE email = $1",
-      data,
+      [email],
     );
-
     await conn.query("COMMIT");
-    conn.release();
-
     return rows[0];
   } catch (error) {
+    await conn.query("ROLLBACK");
     console.error("Error fetching user by email:", error);
     throw new Error("Failed to fetch user by email");
+  } finally {
+    conn.release();
   }
 };
 
-const addUserRecord = async ({
-  email,
-  first_name,
-  last_name,
-  age,
-  password,
-}) => {
+const addUserRecord = async ({ email, first_name, last_name, age, password }) => {
+  const conn = await pool.connect();
   try {
-    const data = [email, first_name, last_name, age, password];
-
-    const conn = await pool.connect();
     await conn.query("BEGIN");
-
     const { rows } = await conn.query(
       "INSERT INTO users (email, first_name, last_name, age, password) VALUES ($1, $2, $3, $4, $5) RETURNING id, email, first_name, last_name, age",
-      data,
+      [email, first_name, last_name, age, password],
     );
-
     await conn.query("COMMIT");
-    conn.release();
-
     return rows[0];
   } catch (error) {
+    await conn.query("ROLLBACK");
     console.error("Error inserting user record:", error);
     throw new Error("Failed to insert user record");
+  } finally {
+    conn.release();
   }
 };
 
 const updateUserRefreshToken = async ({ email, token }) => {
+  const conn = await pool.connect();
   try {
-    const conn = await pool.connect();
     await conn.query("BEGIN");
-
-    await pool.query("UPDATE users SET refresh_token = $1 WHERE email = $2", [
-      token,
-      email,
-    ]);
-
+    await conn.query(
+      "UPDATE users SET refresh_token = $1 WHERE email = $2",
+      [token, email],
+    );
     await conn.query("COMMIT");
-    conn.release();
-
     return true;
   } catch (error) {
+    await conn.query("ROLLBACK");
     console.error("Error updating user refresh token:", error);
     return null;
+  } finally {
+    conn.release();
   }
 };
 

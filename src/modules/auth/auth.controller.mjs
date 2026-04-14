@@ -40,7 +40,7 @@ const signup = async (req, res) => {
     const payload = userRegistrationSchema.safeParse(req.body);
 
     if (!payload.success) {
-      ApiResponse.badRequest(
+      return ApiResponse.badRequest(
         res,
         "Validation failed",
         JSON.parse(payload.error?.message),
@@ -50,23 +50,24 @@ const signup = async (req, res) => {
     const userExists = await getUserByEmail(payload.data.email);
 
     if (userExists) {
-      ApiResponse.badRequest(res, "User with this email already exists");
+      return ApiResponse.badRequest(
+        res,
+        "User with this email already exists",
+      );
     }
 
-    // ceate a hash of the password before storing it in the database
     payload.data.password = genrateHash(payload.data.password);
 
     const userData = await addUserRecord(payload.data);
 
     if (!userData) {
-      ApiResponse.internal("Failed to create user");
+      return ApiResponse.internal(res, "Failed to create user");
     }
 
     ApiResponse.created(res, "Sign-up successful", userData);
   } catch (error) {
     console.error("Error during sign-up:", error);
-
-    ApiResponse.internal("Internal server error");
+    ApiResponse.internal(res, "Internal server error");
   }
 };
 
@@ -75,7 +76,8 @@ const signin = async (req, res) => {
     const payload = userLoginSchema.safeParse(req.body);
 
     if (!payload.success) {
-      ApiResponse.badRequest(
+      return ApiResponse.badRequest(
+        res,
         "Invalid data",
         JSON.parse(payload.error?.message),
       );
@@ -84,13 +86,13 @@ const signin = async (req, res) => {
     const userData = await getUserByEmail(payload.data.email);
 
     if (!userData) {
-      ApiResponse.badRequest("Invalid email or password");
+      return ApiResponse.badRequest(res, "Invalid email or password");
     }
 
     const hashedPassword = genrateHash(payload.data.password);
 
     if (hashedPassword !== userData.password) {
-      ApiResponse.badRequest("Invalid email or password");
+      return ApiResponse.badRequest(res, "Invalid email or password");
     }
 
     const refresh_token = generateToken({
@@ -104,7 +106,7 @@ const signin = async (req, res) => {
     });
 
     if (!access_token || !refresh_token) {
-      ApiResponse.internal("Sign-in failed. Please try again.");
+      return ApiResponse.internal(res, "Sign-in failed. Please try again.");
     }
 
     const rfTokenUpdate = await updateUserRefreshToken({
@@ -113,7 +115,7 @@ const signin = async (req, res) => {
     });
 
     if (!rfTokenUpdate) {
-      ApiResponse.internal("Sign-in failed. Please try again.");
+      return ApiResponse.internal(res, "Sign-in failed. Please try again.");
     }
 
     delete userData.password;
@@ -126,7 +128,7 @@ const signin = async (req, res) => {
 
     ApiResponse.success(res, "Sign-in successful", data);
   } catch (error) {
-    ApiResponse.internal(res, "something went wrong while sining in user");
+    ApiResponse.internal(res, "something went wrong while signing in user");
   }
 };
 

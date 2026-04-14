@@ -1,28 +1,15 @@
 import z from "zod";
 import { ApiResponse } from "../../common/apierror.mjs";
-import { verifyToken } from "../../common/jwt.mjs";
-import {
-  bookSingleSeat,
-  getAllSeats,
-  getSeatStatus,
-} from "./booking.service.mjs";
+import { bookSeatIfAvailable, getAllSeats } from "./booking.service.mjs";
 
 const seatBookingSchema = z.object({
-  id: z.coerce.number().positive().describe("user id"),
+  id: z.coerce.number().positive().describe("seat id"),
   name: z.string().describe("user first name"),
 });
 
 const getSeats = async (req, res) => {
   try {
     const data = await getAllSeats();
-
-    if (!data) {
-      return ApiResponse.badRequest(
-        res,
-        "something went wrong while getting data",
-      );
-    }
-
     ApiResponse.success(res, "seats data fetched", data);
   } catch (error) {
     ApiResponse.internal(res, "Error getting seats data");
@@ -41,28 +28,17 @@ const bookSeat = async (req, res) => {
       );
     }
 
-    const { id, name } = payload.data;
+    const { id } = payload.data;
+    const { id: userId, email } = req.user;
 
-    const token = req.headers.authorization.split(" ")[1];
-    const { id: userId, email } = verifyToken(token);
+    const result = await bookSeatIfAvailable({ id, userId });
 
-    const result = await getSeatStatus(id);
-
-    if (result.length === 0) {
+    if (result.error === "not_found") {
       return ApiResponse.badRequest(res, "Requested seat not available.");
     }
 
-    if (result.length !== 0 && result[0]?.isbooked) {
+    if (result.error === "already_booked") {
       return ApiResponse.badRequest(res, "Requested seat already booked.");
-    }
-
-    const bookingResult = await bookSingleSeat({ name, id, userId });
-
-    if (!bookingResult) {
-      return ApiResponse.internal(
-        res,
-        "Something went wrong while booking seat",
-      );
     }
 
     ApiResponse.created(res, `Seat booked by: ${email}`);
