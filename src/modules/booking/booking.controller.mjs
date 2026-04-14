@@ -48,8 +48,12 @@ const bookSeat = async (req, res) => {
 
     const result = await getSeatStatus(id);
 
-    if (result && result.length === 0) {
-      return ApiResponse.badRequest(res, "Seat already booked");
+    if (result.length === 0) {
+      return ApiResponse.badRequest(res, "Requested seat not available.");
+    }
+
+    if (result.length !== 0 && result[0]?.isbooked) {
+      return ApiResponse.badRequest(res, "Requested seat already booked.");
     }
 
     const bookingResult = await bookSingleSeat({ name, id, userId });

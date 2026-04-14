@@ -18,7 +18,7 @@ const getSeatStatus = async (id) => {
     await conn.query("BEGIN");
 
     const { rows } = await conn.query(
-      "SELECT * FROM seats where id = $1 and isbooked = false FOR UPDATE",
+      "SELECT * FROM seats where id = $1 FOR UPDATE",
       [id],
     );
 
