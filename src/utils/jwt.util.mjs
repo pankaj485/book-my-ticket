@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import { configDotenv } from "dotenv";
 import jwt from "jsonwebtoken";
 configDotenv();
@@ -31,4 +32,7 @@ const verifyToken = (token) => {
   }
 };
 
-export { generateToken, verifyToken };
+const genrateHash = (data) => {
+  return createHash("sha256").update(data).digest("hex");
+};
+export { generateToken, genrateHash, verifyToken };

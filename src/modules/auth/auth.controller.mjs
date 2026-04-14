@@ -1,6 +1,5 @@
-import { createHash } from "crypto";
 import z from "zod";
-import { generateToken } from "../../utils/jwt.util.mjs";
+import { generateToken, genrateHash } from "../../utils/jwt.util.mjs";
 import {
   addUserRecord,
   getUserByEmail,
@@ -55,9 +54,7 @@ const signup = async (req, res) => {
     }
 
     // ceate a hash of the password before storing it in the database
-    payload.data.password = createHash("sha256")
-      .update(payload.data.password)
-      .digest("hex");
+    payload.data.password = genrateHash(payload.data.password);
 
     const userData = await addUserRecord(payload.data);
 
@@ -89,15 +86,15 @@ const signin = async (req, res) => {
     const userData = await getUserByEmail(payload.data.email);
 
     if (!userData) {
-      return res.status(400).json({ message: "User not registered" });
+      return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    const hashedPassword = createHash("sha256")
-      .update(payload.data.password)
-      .digest("hex");
+    const hashedPassword = genrateHash(payload.data.password);
 
     if (hashedPassword !== userData.password) {
-      return res.status(400).json({ message: "Invalid email or password" });
+      return res.status(400).json({
+        message: "Invalid email or password",
+      });
     }
 
     const refresh_token = generateToken({
@@ -121,9 +118,11 @@ const signin = async (req, res) => {
         .json({ message: "Sign-in failed. Please try again." });
     }
 
+    delete userData.password;
+
     return res.status(200).json({
       message: "Sign-in successful",
-      data: { ...userData, refresh_token, access_token },
+      data: { userData, refresh_token, access_token },
     });
   } catch (error) {}
 };

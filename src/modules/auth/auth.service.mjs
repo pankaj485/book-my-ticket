@@ -4,7 +4,7 @@ const getUserByEmail = async (email) => {
   try {
     const data = [email];
     const { rows } = await pool.query(
-      "SELECT email FROM users WHERE email = $1",
+      "SELECT id, email, password FROM users WHERE email = $1",
       data,
     );
 
@@ -39,9 +39,10 @@ const addUserRecord = async ({
 
 const updateUserRefreshToken = async ({ email, token }) => {
   try {
-    await pool.qyuery(
-      "UPDATE users SET refresh_token = $1 WHERE email = $2 RETURNING email, refresh_token",
-    );
+    await pool.query("UPDATE users SET refresh_token = $1 WHERE email = $2", [
+      token,
+      email,
+    ]);
 
     return true;
   } catch (error) {
