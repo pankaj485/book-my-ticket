@@ -1,7 +1,7 @@
 import { ApiResponse } from "../common/apierror.mjs";
 import { verifyToken } from "../common/jwt.mjs";
 
-const validateToken = (req, res, next) => {
+const validateUserAuth = (req, res, next) => {
   try {
     const { authorization } = req.headers;
 
@@ -26,4 +26,4 @@ const validateToken = (req, res, next) => {
   }
 };
 
-export { validateToken };
+export { validateUserAuth };

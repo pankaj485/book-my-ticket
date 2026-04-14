@@ -1,12 +1,11 @@
 import z from "zod";
 import { ApiResponse } from "../../common/apierror.mjs";
+import { verifyToken } from "../../common/jwt.mjs";
 import {
   bookSingleSeat,
   getAllSeats,
   getSeatStatus,
 } from "./booking.service.mjs";
-import { validateToken } from "../../middlewares/auth.middleware.mjs";
-import { verifyToken } from "../../common/jwt.mjs";
 
 const seatBookingSchema = z.object({
   id: z.coerce.number().positive().describe("user id"),
@@ -18,7 +17,10 @@ const getSeats = async (req, res) => {
     const data = await getAllSeats();
 
     if (!data) {
-      return ApiResponse.badRequest(res, "something went wrong while getting data");
+      return ApiResponse.badRequest(
+        res,
+        "something went wrong while getting data",
+      );
     }
 
     ApiResponse.success(res, "seats data fetched", data);
@@ -53,7 +55,10 @@ const bookSeat = async (req, res) => {
     const bookingResult = await bookSingleSeat({ name, id, userId });
 
     if (!bookingResult) {
-      return ApiResponse.internal(res, "Something went wrong while booking seat");
+      return ApiResponse.internal(
+        res,
+        "Something went wrong while booking seat",
+      );
     }
 
     ApiResponse.created(res, `Seat booked by: ${email}`);
