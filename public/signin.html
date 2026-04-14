@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In – ChaiCode Cinema</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap");
+      body {
+        font-family: "Outfit", sans-serif;
+        background-color: #0f172a;
+        color: #f8fafc;
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
+  >
+    <div
+      class="w-full max-w-md bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-slate-700/50"
+    >
+      <div class="text-center mb-8">
+        <h1
+          class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 tracking-tight"
+        >
+          ChaiCode Cinema
+        </h1>
+        <p class="text-slate-400 mt-2">Sign in to book your seat</p>
+      </div>
+
+      <!-- Error banner -->
+      <div
+        id="error-banner"
+        class="hidden mb-5 px-4 py-3 rounded-xl text-sm font-medium bg-rose-500/10 border border-rose-500/30 text-rose-400"
+      ></div>
+
+      <form id="signin-form" novalidate class="space-y-5">
+        <div>
+          <label for="email" class="block text-slate-400 text-sm mb-1"
+            >Email</label
+          >
+          <input
+            type="email"
+            id="email"
+            placeholder="you@example.com"
+            class="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+          />
+          <p id="email-error" class="hidden mt-1 text-xs text-rose-400"></p>
+        </div>
+
+        <div>
+          <label for="password" class="block text-slate-400 text-sm mb-1"
+            >Password</label
+          >
+          <input
+            type="password"
+            id="password"
+            placeholder="*********"
+            class="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+          />
+          <p id="password-error" class="hidden mt-1 text-xs text-rose-400"></p>
+        </div>
+
+        <button
+          type="submit"
+          id="submit-btn"
+          class="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all duration-200"
+        >
+          Sign In
+        </button>
+      </form>
+
+      <p class="text-center text-slate-400 text-sm mt-6">
+        Don't have an account?
+        <a
+          href="/signup"
+          class="text-emerald-400 hover:text-emerald-300 font-semibold"
+          >Sign Up</a
+        >
+      </p>
+    </div>
+
+    <script>
+      if (localStorage.getItem("access_token")) {
+        window.location.href = "/";
+      }
+
+      const form = document.getElementById("signin-form");
+      const submitBtn = document.getElementById("submit-btn");
+      const errorBanner = document.getElementById("error-banner");
+
+      function showFieldError(id, msg) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.classList.remove("hidden");
+      }
+
+      function clearErrors() {
+        errorBanner.classList.add("hidden");
+        ["email-error", "password-error"].forEach((id) => {
+          const el = document.getElementById(id);
+          el.textContent = "";
+          el.classList.add("hidden");
+        });
+      }
+
+      function validate() {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        let valid = true;
+
+        if (!email) {
+          showFieldError("email-error", "Email is required.");
+          valid = false;
+        }
+        if (password.length < 6) {
+          showFieldError(
+            "password-error",
+            "Password must be at least 6 characters.",
+          );
+          valid = false;
+        }
+
+        return valid;
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearErrors();
+        if (!validate()) return;
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Signing in…";
+
+        try {
+          const res = await fetch("/auth/signin", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            errorBanner.textContent =
+              data.message || "Invalid email or password.";
+            errorBanner.classList.remove("hidden");
+            return;
+          }
+
+          localStorage.setItem("access_token", data.data.access_token);
+          localStorage.setItem("user_email", email);
+          window.location.href = "/";
+        } catch {
+          errorBanner.textContent = "Network error. Please try again.";
+          errorBanner.classList.remove("hidden");
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Sign In";
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign Up – ChaiCode Cinema</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap");
+      body {
+        font-family: "Outfit", sans-serif;
+        background-color: #0f172a;
+        color: #f8fafc;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div class="w-full max-w-md bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-slate-700/50">
+
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 tracking-tight">
+          ChaiCode Cinema
+        </h1>
+        <p class="text-slate-400 mt-2">Create your account</p>
+      </div>
+
+      <!-- Banner -->
+      <div id="banner" class="hidden mb-5 px-4 py-3 rounded-xl text-sm font-medium"></div>
+
+      <form id="signup-form" novalidate class="space-y-5">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label for="first_name" class="block text-slate-400 text-sm mb-1">First Name</label>
+            <input
+              type="text"
+              id="first_name"
+              placeholder="John"
+              class="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+            />
+            <p id="first_name-error" class="hidden mt-1 text-xs text-rose-400"></p>
+          </div>
+          <div>
+            <label for="last_name" class="block text-slate-400 text-sm mb-1">Last Name</label>
+            <input
+              type="text"
+              id="last_name"
+              placeholder="Doe"
+              class="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+            />
+            <p id="last_name-error" class="hidden mt-1 text-xs text-rose-400"></p>
+          </div>
+        </div>
+
+        <div>
+          <label for="email" class="block text-slate-400 text-sm mb-1">Email</label>
+          <input
+            type="email"
+            id="email"
+            placeholder="you@example.com"
+            class="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+          />
+          <p id="email-error" class="hidden mt-1 text-xs text-rose-400"></p>
+        </div>
+
+        <div>
+          <label for="password" class="block text-slate-400 text-sm mb-1">Password</label>
+          <input
+            type="password"
+            id="password"
+            placeholder="Min. 6 characters"
+            class="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+          />
+          <p id="password-error" class="hidden mt-1 text-xs text-rose-400"></p>
+        </div>
+
+        <div>
+          <label for="age" class="block text-slate-400 text-sm mb-1">Age</label>
+          <input
+            type="number"
+            id="age"
+            min="18"
+            placeholder="Must be 18 or older"
+            class="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors"
+          />
+          <p id="age-error" class="hidden mt-1 text-xs text-rose-400"></p>
+        </div>
+
+        <button
+          type="submit"
+          id="submit-btn"
+          class="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition-all duration-200"
+        >
+          Create Account
+        </button>
+      </form>
+
+      <p class="text-center text-slate-400 text-sm mt-6">
+        Already have an account?
+        <a href="/signin" class="text-emerald-400 hover:text-emerald-300 font-semibold">Sign In</a>
+      </p>
+    </div>
+
+    <script>
+      if (localStorage.getItem("access_token")) {
+        window.location.href = "/";
+      }
+
+      const form = document.getElementById("signup-form");
+      const submitBtn = document.getElementById("submit-btn");
+      const banner = document.getElementById("banner");
+
+      const fields = ["first_name", "last_name", "email", "password", "age"];
+
+      function showFieldError(id, msg) {
+        const el = document.getElementById(id + "-error");
+        el.textContent = msg;
+        el.classList.remove("hidden");
+      }
+
+      function clearErrors() {
+        banner.classList.add("hidden");
+        fields.forEach((f) => {
+          const el = document.getElementById(f + "-error");
+          el.textContent = "";
+          el.classList.add("hidden");
+        });
+      }
+
+      function showBanner(msg, isError) {
+        banner.textContent = msg;
+        banner.className = isError
+          ? "mb-5 px-4 py-3 rounded-xl text-sm font-medium bg-rose-500/10 border border-rose-500/30 text-rose-400"
+          : "mb-5 px-4 py-3 rounded-xl text-sm font-medium bg-emerald-500/10 border border-emerald-500/30 text-emerald-400";
+      }
+
+      function validate() {
+        const first_name = document.getElementById("first_name").value.trim();
+        const last_name = document.getElementById("last_name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const age = Number(document.getElementById("age").value);
+        let valid = true;
+
+        if (first_name.length < 3) {
+          showFieldError("first_name", "At least 3 characters.");
+          valid = false;
+        }
+        if (last_name.length < 3) {
+          showFieldError("last_name", "At least 3 characters.");
+          valid = false;
+        }
+        if (!email || !/\S+@\S+\.\S+/.test(email)) {
+          showFieldError("email", "Enter a valid email address.");
+          valid = false;
+        }
+        if (password.length < 6) {
+          showFieldError("password", "At least 6 characters.");
+          valid = false;
+        }
+        if (!age || age < 18) {
+          showFieldError("age", "Must be 18 or older.");
+          valid = false;
+        }
+
+        return valid;
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        clearErrors();
+        if (!validate()) return;
+
+        const body = {
+          first_name: document.getElementById("first_name").value.trim(),
+          last_name: document.getElementById("last_name").value.trim(),
+          email: document.getElementById("email").value.trim(),
+          password: document.getElementById("password").value,
+          age: Number(document.getElementById("age").value),
+        };
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Creating account…";
+
+        try {
+          const res = await fetch("/auth/signup", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            const detail = Array.isArray(data.data)
+              ? data.data.map((e) => e.message).join(", ")
+              : data.message;
+            showBanner(detail || "Sign up failed.", true);
+            return;
+          }
+
+          showBanner("Account created! Redirecting to sign in…", false);
+          setTimeout(() => {
+            window.location.href = "/signin";
+          }, 1500);
+        } catch {
+          showBanner("Network error. Please try again.", true);
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Create Account";
+        }
+      });
+    </script>
+  </body>
+</html>

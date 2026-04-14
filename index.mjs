@@ -21,6 +21,14 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
+app.get("/signin", (req, res) => {
+  res.sendFile(__dirname + "/public/signin.html");
+});
+
+app.get("/signup", (req, res) => {
+  res.sendFile(__dirname + "/public/signup.html");
+});
+
 app.use("/auth", authRouter);
 
 //get all seats
