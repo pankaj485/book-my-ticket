@@ -14,9 +14,6 @@ const pool = new pg.Pool({
 pool.on("connect", () => {
   console.log("Connected to the database successfully.");
 });
-pool.on("acquire", () => {
-  console.log("Connection acquired from the pool.");
-});
 pool.on("error", (error) => {
   console.error("Error connecting to the database:", error);
 });

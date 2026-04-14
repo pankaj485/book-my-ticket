@@ -17,7 +17,7 @@ const getSeatStatus = async (id) => {
     const conn = await pool.connect(); // pick a connection from the pool
     await conn.query("BEGIN");
 
-    const result = await conn.query(
+    const { rows } = await conn.query(
       "SELECT * FROM seats where id = $1 and isbooked = false FOR UPDATE",
       [id],
     );
@@ -26,7 +26,7 @@ const getSeatStatus = async (id) => {
     await conn.query("COMMIT");
     conn.release();
 
-    return result;
+    return rows;
   } catch (error) {
     console.error("something went wrong while booking seat");
 
@@ -40,18 +40,18 @@ const bookSingleSeat = async ({ id, userId }) => {
 
     await conn.query("BEGIN");
 
-    const updateResult = await conn.query(
-      "UPDATE seats SET isbooked = TRUE, user_id = $2 WHERE id = $1",
+    const { rows } = await conn.query(
+      "UPDATE seats SET isbooked = TRUE, user_id = $2 WHERE id = $1 RETURNING *",
       [id, userId],
     );
 
     await conn.query("COMMIT");
     conn.release();
 
-    return updateResult;
+    return rows;
   } catch (error) {
     console.log(error);
-    console.error("Error booking seat");
+    console.error("Error booking seat", error);
     return null;
   }
 };

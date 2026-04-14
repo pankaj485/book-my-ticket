@@ -40,25 +40,23 @@ const bookSeat = async (req, res) => {
     }
 
     const { id, name } = payload.data;
-    const token = req.headers.authorization.split(" ")[1];
 
-    const { id: userId } = verifyToken(token);
+    const token = req.headers.authorization.split(" ")[1];
+    const { id: userId, email } = verifyToken(token);
 
     const result = await getSeatStatus(id);
 
-    if (result && result.rowCount === 0) {
+    if (result && result.length === 0) {
       ApiResponse.badRequest(res, "Seat already booked");
     }
 
     const bookingResult = await bookSingleSeat({ name, id, userId });
 
-    console.log("booking result: ", bookingResult);
-
-    if (!bookSingleSeat) {
+    if (!bookingResult) {
       ApiResponse.internal(res, "Something went wrong while booking seat");
     }
 
-    ApiResponse.created(res, `Seat booked by user`, bookingResult);
+    ApiResponse.created(res, `Seat booked by: ${email}`);
   } catch (error) {
     ApiResponse.internal(res, "Error booking seat");
   }
